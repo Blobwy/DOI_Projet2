@@ -26,7 +26,7 @@ def read_temperature_c() -> float:
 
 connected = False 
 def on_connect(client, userdata, flags, reason_code, properties=None):
-
+    client.publish(TOPIC_ONLINE, payload="online", qos=1, retain=True)
     global connected
     print(f"[CONNECT] reason_code={reason_code}")
     connected = (reason_code == 0)

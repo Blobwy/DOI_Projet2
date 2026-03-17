@@ -13,6 +13,7 @@ LED_PIN_BCM = 27
 
 TOPIC_CMD = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/actuators/led/cmd"
 TOPIC_STATE = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/actuators/led/state"
+TOPIC_STATUS = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/status"
 
 led = LED(LED_PIN_BCM)
 
@@ -46,6 +47,7 @@ def parse_command(payload_text: str) -> str | None:
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print(f" [CONNECT] connecté au broker (code {reason_code})")
     if reason_code == 0:
+        client.publish(TOPIC_STATUS, payload="online", qos=1, retain=True)
         client.subscribe(TOPIC_CMD, qos=1)
         print(f" [SUB] Abonné à : {TOPIC_CMD}")
         publish_led_state(client)
@@ -64,8 +66,9 @@ def on_message(client, userdata, msg):
         return
 
     publish_led_state(client)
-
+    
 client = mqtt.Client(client_id=CLIENT_ID, protocol=mqtt.MQTTv311)
+client.will_set(TOPIC_STATUS, payload="offline", qos=1, retain=True)
 client.on_connect = on_connect
 client.on_message = on_message
 

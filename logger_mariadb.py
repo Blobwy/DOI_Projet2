@@ -12,6 +12,7 @@ MQTT_KEEPALIVE = 60
 MQTT_PREFIX = "ahuntsic/aec-iot/b3/jp-gauthier/pi01"
 MQTT_TOPIC_FILTER = f"{MQTT_PREFIX}/#"
 MQTT_CLIENT_ID = "b3-logger-jp-gauthier-pi01"
+TOPIC_STATUS = "ahuntsic/aec-iot/b3/jp-gauthier/pi01/status/online"
 
 DB_HOST = "localhost"
 DB_USER = "iot"
@@ -96,6 +97,7 @@ def on_connect(client, _userdata, _flags, reason_code, properties=None):
     print(f"[CONNECT] reason_code={reason_code}")
     if reason_code == 0:
         client.subscribe(MQTT_TOPIC_FILTER, qos=0)
+        client.publish(TOPIC_STATUS, payload="online", qos=1, retain=True)
         print(f"[SUB] {MQTT_TOPIC_FILTER}")
     else:
         print("[ERROR] Connexion MQTT échouée.")
@@ -128,6 +130,8 @@ def on_disconnect(_client, _userdata, reason_code, properties=None):
     print(f"[DISCONNECT] reason_code={reason_code}")
 
 client = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=mqtt.MQTTv311)
+
+client.will_set(TOPIC_STATUS, payload="offline", qos=1, retain=True)
 client.on_connect = on_connect
 client.on_message = on_message
 client.on_disconnect = on_disconnect
