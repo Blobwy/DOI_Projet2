@@ -118,11 +118,11 @@ def on_message(_client, _userdata, msg: mqtt.MQTTMessage):
     except pymysql.MySQLError as e:
         print(f"[DB-ERROR] {e} -> reconnexion")
         global db
-    try:
-        db.close()
-    except Exception:
-        pass
-    db = db_connect()
+        try:
+            db.close()
+        except Exception:
+            pass
+        db = db_connect()
 
 def on_disconnect(_client, _userdata, reason_code, properties=None):
     print(f"[DISCONNECT] reason_code={reason_code}")
