@@ -11,7 +11,7 @@ MQTT_KEEPALIVE = 60
 
 MQTT_PREFIX = "ahuntsic/aec-iot/b3/jp-gauthier/pi01"
 MQTT_TOPIC_FILTER = f"{MQTT_PREFIX}/#"
-MQTT_CLIENT_ID = "b3-logger-demo-pi01"
+MQTT_CLIENT_ID = "b3-logger-jp-gauthier-pi01"
 
 DB_HOST = "localhost"
 DB_USER = "iot"
