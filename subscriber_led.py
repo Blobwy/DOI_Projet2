@@ -1,6 +1,7 @@
 import json
 import paho.mqtt.client as mqtt
 from gpiozero import LED
+import datetime
 
 BROKER_HOST = "localhost"
 BROKER_PORT = 1883
@@ -16,9 +17,21 @@ TOPIC_STATE = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/actuators/led/state"
 led = LED(LED_PIN_BCM)
 
 def publish_led_state(client: mqtt.Client):
-    state = "on" if led.is_lit else "off"
-    client.publish(TOPIC_STATE, state, qos=1, retain=True)
-    print(f" [STATE] {TOPIC_STATE} -> {state}")
+    if led.is_lit:
+        val_state = "on"
+    else:
+        val_state = "off"
+
+    payload_dict = {
+        "device": DEVICE,
+        "actuator": "led",
+        "state": val_state,
+        "ts": datetime.datetime.now(datetime.timezone.utc).isoformat()
+    }
+
+    payload_json = json.dumps(payload_dict)
+    client.publish(TOPIC_STATE, payload_json, qos=1, retain=True)
+    print(f" [STATE] {TOPIC_STATE} -> {payload_json}")
 
 def parse_command(payload_text: str) -> str | None:
     try:

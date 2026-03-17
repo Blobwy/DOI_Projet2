@@ -5,7 +5,7 @@ from typing import Any, Optional
 import pymysql
 import paho.mqtt.client as mqtt
 
-MQTT_BROKER_HOST = "192.168.2.143"
+MQTT_BROKER_HOST = "localhost"
 MQTT_BROKER_PORT = 1883
 MQTT_KEEPALIVE = 60
 
@@ -13,7 +13,7 @@ MQTT_PREFIX = "ahuntsic/aec-iot/b3/jp-gauthier/pi01"
 MQTT_TOPIC_FILTER = f"{MQTT_PREFIX}/#"
 MQTT_CLIENT_ID = "b3-logger-demo-pi01"
 
-DB_HOST = "192.168.2.143"
+DB_HOST = "localhost"
 DB_USER = "iot"
 DB_PASSWORD = "iot"
 DB_NAME = "iot_b3"
