@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timezone
 import paho.mqtt.client as mqtt
 
-BROKER_HOST = "192.168.2.143"
+BROKER_HOST ="localhost"
 BROKER_PORT = 1883 
 KEEPALIVE_S = 60
 CLIENT_ID = "gauthier"
@@ -23,7 +23,7 @@ PUBLISH_PERIOD_S = 2.0
 
 def read_temperature_c() -> float:
 
-    return round(20.0 + random.random() * 5.0, 2)
+    return round (random.uniform(0.0, 40.0), 2)
 
 connected = False 
 def on_connect(client, userdata, flags, reason_code, properties=None):
