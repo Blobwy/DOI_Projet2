@@ -1,8 +1,8 @@
 CREATE DATABASE IF NOT EXISTS iot_b3
 CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci; [cite: 628, 629, 630]
+COLLATE utf8mb4_unicode_ci;
 
-USE iot_b3; [cite: 635]
+USE iot_b3;
 
 CREATE TABLE IF NOT EXISTS telemetry (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -24,5 +24,9 @@ CREATE TABLE IF NOT EXISTS events (
     kind VARCHAR(16) NOT NULL,   
     payload TEXT NOT NULL,
     PRIMARY KEY (id),
-    INDEX idx_events_device_ts (device, ts_utc) [cite: 655, 657]
+    INDEX idx_events_device_ts (device, ts_utc)
 );
+
+CREATE USER IF NOT EXISTS 'iot'@'localhost' IDENTIFIED BY 'iot';
+GRANT ALL PRIVILEGES ON iot_b3.* TO 'iot'@'localhost';
+FLUSH PRIVILEGES;

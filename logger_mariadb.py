@@ -1,42 +1,3 @@
-"""
-CREATE DATABASE iot_b3
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-CREATE USER 'iot'@'localhost' IDENTIFIED BY 'iot';
-
-GRANT ALL PRIVILEGES ON iot_b3.* TO 'iot'@'localhost';
-
-FLUSH PRIVILEGES;
-
-USE iot_b3;
-
-CREATE TABLE telemetry (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    ts_utc DATETIME(3) NOT NULL,
-    device VARCHAR(32) NOT NULL,
-    topic VARCHAR(255) NOT NULL,
-    value DOUBLE NULL,
-    unit VARCHAR(16) NULL,
-    payload TEXT NOT NULL,
-    PRIMARY KEY (id),
-    INDEX idx_telemetry_device_ts (device, ts_utc)
-);
-
-CREATE TABLE events (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    ts_utc DATETIME(3) NOT NULL,
-    device VARCHAR(32) NOT NULL,
-    topic VARCHAR(255) NOT NULL,
-    kind VARCHAR(16) NOT NULL,
-    payload TEXT NOT NULL,
-    PRIMARY KEY (id),
-    INDEX idx_events_device_ts (device, ts_utc)
-);
-"""
-
-""" ######################################### """
-
 import json
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -48,7 +9,7 @@ MQTT_BROKER_HOST = "192.168.2.143"
 MQTT_BROKER_PORT = 1883
 MQTT_KEEPALIVE = 60
 
-MQTT_PREFIX = "ahuntsic/aec-iot/b3/demo/pi01"
+MQTT_PREFIX = "ahuntsic/aec-iot/b3/jp-gauthier/pi01"
 MQTT_TOPIC_FILTER = f"{MQTT_PREFIX}/#"
 MQTT_CLIENT_ID = "b3-logger-demo-pi01"
 
@@ -56,6 +17,7 @@ DB_HOST = "192.168.2.143"
 DB_USER = "iot"
 DB_PASSWORD = "iot"
 DB_NAME = "iot_b3"
+
 def utc_now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
@@ -137,7 +99,7 @@ def on_connect(client, _userdata, _flags, reason_code, properties=None):
         print(f"[SUB] {MQTT_TOPIC_FILTER}")
     else:
         print("[ERROR] Connexion MQTT échouée.")
-        
+
 def on_message(_client, _userdata, msg: mqtt.MQTTMessage):
 
     topic = msg.topic
