@@ -1,2 +1,4 @@
+colorzero==2.0
+gpiozero==2.0.1
 paho-mqtt==2.1.0
 PyMySQL==1.1.2
