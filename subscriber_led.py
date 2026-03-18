@@ -1,21 +1,11 @@
 import json
+import datetime
+import Config
 import paho.mqtt.client as mqtt
 from gpiozero import LED
-import datetime
 
-BROKER_HOST = "localhost"
-BROKER_PORT = 1883
-KEEPALIVE_S = 60
-TEAM = "jp-gauthier"
-DEVICE = "pi01"
-CLIENT_ID = "b3-sub-jp-gauthier-pi01-led"
-LED_PIN_BCM = 27
 
-TOPIC_CMD = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/actuators/led/cmd"
-TOPIC_STATE = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/actuators/led/state"
-TOPIC_STATUS = f"ahuntsic/aec-iot/b3/{TEAM}/{DEVICE}/status"
-
-led = LED(LED_PIN_BCM)
+led = LED(Config.LED_PIN_BCM)
 
 def publish_led_state(client: mqtt.Client):
     if led.is_lit:
@@ -24,15 +14,15 @@ def publish_led_state(client: mqtt.Client):
         val_state = "off"
 
     payload_dict = {
-        "device": DEVICE,
+        "device": Config.DEVICE,
         "actuator": "led",
         "state": val_state,
         "ts": datetime.datetime.now(datetime.timezone.utc).isoformat()
     }
 
     payload_json = json.dumps(payload_dict)
-    client.publish(TOPIC_STATE, payload_json, qos=1, retain=True)
-    print(f" [STATE] {TOPIC_STATE} -> {payload_json}")
+    client.publish(Config.TOPIC_STATE, payload_json, qos=1, retain=True)
+    print(f" [STATE] {Config.TOPIC_STATE} -> {payload_json}")
 
 def parse_command(payload_text: str) -> str | None:
     try:
@@ -47,9 +37,9 @@ def parse_command(payload_text: str) -> str | None:
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print(f" [CONNECT] connecté au broker (code {reason_code})")
     if reason_code == 0:
-        client.publish(TOPIC_STATUS, payload="online", qos=1, retain=True)
-        client.subscribe(TOPIC_CMD, qos=1)
-        print(f" [SUB] Abonné à : {TOPIC_CMD}")
+        client.publish(Config.TOPIC_ONLINE, payload="online", qos=1, retain=True)
+        client.subscribe(Config.TOPIC_CMD, qos=1)
+        print(f" [SUB] Abonné à : {Config.TOPIC_CMD}")
         publish_led_state(client)
 
 def on_message(client, userdata, msg):
@@ -67,11 +57,11 @@ def on_message(client, userdata, msg):
 
     publish_led_state(client)
     
-client = mqtt.Client(client_id=CLIENT_ID, protocol=mqtt.MQTTv311)
-client.will_set(TOPIC_STATUS, payload="offline", qos=1, retain=True)
+client = mqtt.Client(client_id=Config.CLIENT_ID, protocol=mqtt.MQTTv311)
+client.will_set(Config.TOPIC_ONLINE, payload="offline", qos=1, retain=True)
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect(BROKER_HOST, BROKER_PORT, keepalive=KEEPALIVE_S)
+client.connect(Config.MQTT_BROKER_HOST, Config.MQTT_BROKER_PORT, keepalive=Config.MQTT_KEEPALIVE)
 print("[INFO] Subscriber LED démarré. En attente de commandes...")
 client.loop_forever()

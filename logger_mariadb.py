@@ -1,33 +1,20 @@
 import json
+import Config
 from datetime import datetime, timezone
 from typing import Any, Optional
 
 import pymysql
 import paho.mqtt.client as mqtt
 
-MQTT_BROKER_HOST = "localhost"
-MQTT_BROKER_PORT = 1883
-MQTT_KEEPALIVE = 60
-
-MQTT_PREFIX = "ahuntsic/aec-iot/b3/jp-gauthier/pi01"
-MQTT_TOPIC_FILTER = f"{MQTT_PREFIX}/#"
-MQTT_CLIENT_ID = "b3-logger-jp-gauthier-pi01"
-TOPIC_STATUS = "ahuntsic/aec-iot/b3/jp-gauthier/pi01/status/online"
-
-DB_HOST = "localhost"
-DB_USER = "iot"
-DB_PASSWORD = "iot"
-DB_NAME = "iot_b3"
-
 def utc_now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 def db_connect() -> pymysql.connections.Connection:
     return pymysql.connect(
-    host=DB_HOST,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_NAME,
+    host=Config.DB_HOST,
+    user=Config.DB_USER,
+    password=Config.DB_PASSWORD,
+    database=Config.DB_NAME,
     autocommit=True,
     charset="utf8mb4",
  )
@@ -96,9 +83,9 @@ def insert_event(ts_utc: datetime, device: str, topic: str, kind: str, payload_t
 def on_connect(client, _userdata, _flags, reason_code, properties=None):
     print(f"[CONNECT] reason_code={reason_code}")
     if reason_code == 0:
-        client.subscribe(MQTT_TOPIC_FILTER, qos=0)
-        client.publish(TOPIC_STATUS, payload="online", qos=1, retain=True)
-        print(f"[SUB] {MQTT_TOPIC_FILTER}")
+        client.subscribe(Config.MQTT_TOPIC_FILTER, qos=0)
+        client.publish(Config.TOPIC_ONLINE, payload="online", qos=1, retain=True)
+        print(f"[SUB] {Config.MQTT_TOPIC_FILTER}")
     else:
         print("[ERROR] Connexion MQTT échouée.")
 
@@ -129,13 +116,13 @@ def on_message(_client, _userdata, msg: mqtt.MQTTMessage):
 def on_disconnect(_client, _userdata, reason_code, properties=None):
     print(f"[DISCONNECT] reason_code={reason_code}")
 
-client = mqtt.Client(client_id=MQTT_CLIENT_ID, protocol=mqtt.MQTTv311)
+client = mqtt.Client(client_id=Config.MQTT_CLIENT_ID, protocol=mqtt.MQTTv311)
 
-client.will_set(TOPIC_STATUS, payload="offline", qos=1, retain=True)
+client.will_set(Config.TOPIC_ONLINE, payload="offline", qos=1, retain=True)
 client.on_connect = on_connect
 client.on_message = on_message
 client.on_disconnect = on_disconnect
-client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT, keepalive=MQTT_KEEPALIVE)
+client.connect(Config.MQTT_BROKER_HOST, Config.MQTT_BROKER_PORT, keepalive=Config.MQTT_KEEPALIVE)
 print("[INFO] Logger démarré. CTRL+C pour arrêter.")
 try:
     client.loop_forever()
