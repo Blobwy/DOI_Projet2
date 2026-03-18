@@ -1,8 +1,8 @@
-MQTT_BROKER_HOST = "192.168.2.143"
+MQTT_BROKER_HOST = "localhost"
 MQTT_BROKER_PORT = 1883
 MQTT_KEEPALIVE = 60
 
-DB_HOST = "192.168.2.143"
+DB_HOST = "localhost"
 DB_USER = "iot"
 DB_PASSWORD = "iot"
 DB_NAME = "iot_b3"
