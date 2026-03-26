@@ -7,7 +7,6 @@ DB_USER = "iot"
 DB_PASSWORD = "iot"
 DB_NAME = "iot_b3"
 
-CLIENT_ID = "gauthier"
 TEAM = "jp-gauthier"
 DEVICE = "pi01"
 

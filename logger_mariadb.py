@@ -1,11 +1,9 @@
 import json
 import Config
-from datetime import datetime, timezone
-from typing import Any, Optional
-
 import pymysql
 import paho.mqtt.client as mqtt
-
+from datetime import datetime, timezone
+from typing import Any, Optional
 
 def utc_now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
