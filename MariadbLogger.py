@@ -27,23 +27,25 @@ class MariadbLogger(MqttSubscriber):
     def on_message(self, client, userdata, msg):
         try:
             topic = msg.topic
-            payload = msg.payload.decode("utf-8")
-            device = self.extract_device(topic)
+            payload_raw = msg.payload.decode("utf-8")
+            data = json.loads(payload_raw) 
+            
             ts = self.get_time_now()
-            if self.is_telemetry(topic):
-                self.insert_telemetry(ts, device, topic, payload)
-                print(f"[DB] telemetry <- {topic}")
-            else:
-                kind = self.classify_kind(topic)
-                self.insert_event(ts, device, topic, kind, payload)
-                print(f"[DB] events({kind}) <- {topic}")
+            device = self.extract_device(topic)
+
+            text_audio = data.get("text", "N/A")
+            intention = data.get("intent", "unknown")
+            resultat = data.get("state", "processed")
+
+            with self.db.cursor() as cursor:
+                sql = """INSERT INTO events (ts_utc, device, topic, kind, payload) 
+                        VALUES (%s, %s, %s, %s, %s)"""
+                cursor.execute(sql, (ts, device, topic, intention, payload_raw))
+                
+            print(f"[DB] Commande vocale enregistrée : {intention}")
+
         except Exception as e:
-            print(f"[ERROR] Failed to process message: {e}")
-            try:
-                self.db.close()
-            except Exception:
-                pass
-            self.db = self.connect_db()
+            print(f"[ERROR DB] {e}")
 
     def is_telemetry(self, topic):
         return "/sensors/" in topic and not topic.endswith("/value")

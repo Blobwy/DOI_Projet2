@@ -1,43 +1,43 @@
-import json
-
+import time
+import threading
+from gpiozero import LED
 import Config
 from MqttSubscriber import MqttSubscriber
-from gpiozero import LED
 
 class LedSubscriber(MqttSubscriber):
     def __init__(self):
-        super().__init__(
-            client_id=Config.LED_CLIENT_ID,
-            online_topic=Config.TOPIC_ONLINE,
-        )
-        self.cmd_topic = Config.TOPIC_CMD
-        self.topic_state = Config.TOPIC_STATE
+        super().__init__(client_id=Config.LED_CLIENT_ID, online_topic=Config.TOPIC_ONLINE)
         self.led = LED(Config.LED_PIN_BCM)
-
-    def subscribe_topic(self):
-        self.subscribe(self.cmd_topic)
+        self.blink_thread = None
+        self.stop_blink = threading.Event()
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode("utf-8")
-        command = self.parse_command(payload)
-        if command == "on":
-            self.led.on()
-        elif command == "off":
-            self.led.off()
-        else:
-            print("[WARN] Commande JSON invalide reçue")
-            return
-
-    def parse_command(self, payload):
+        import json
         try:
-            data = json.loads(payload)
-            if "state" in data:
-                state = str(data["state"]).lower().strip()
-                if state in ("on", "off"):
-                    return state
-        except Exception as e:
-            print(f"[ERROR] Failed to parse command: {e}")
-        return None
+            data = json.loads(msg.payload.decode())
+            intent = data.get("intent")
+            
+            # Arrêter tout clignotement en cours avant une nouvelle action
+            self.stop_blink.set()
+            if self.blink_thread: self.blink_thread.join()
+            self.stop_blink.clear()
 
-tmp = LedSubscriber()
-tmp.connect()
+            if intent == "on":
+                self.led.on()
+            elif intent == "off":
+                self.led.off()
+            elif intent == "blink":
+                self.start_action_thread(self.blink_logic, 0.5)
+            elif intent == "night":
+                self.start_action_thread(self.blink_logic, 2.0) # Clignotement lent pour le mode nuit [cite: 253]
+        except Exception as e:
+            print(f"Erreur LED: {e}")
+
+    def start_action_thread(self, target, speed):
+        self.blink_thread = threading.Thread(target=target, args=(speed,))
+        self.blink_thread.start()
+
+    def blink_logic(self, speed):
+        while not self.stop_blink.is_set():
+            self.led.toggle()
+            time.sleep(speed)
