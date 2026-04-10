@@ -33,7 +33,7 @@ class LedSubscriber(MqttSubscriber):
             elif intent == "blink":
                 self.start_action_thread(self.blink_logic, 0.5)
             elif intent == "night":
-                self.start_action_thread(self.blink_logic, 2.0) # Clignotement lent pour le mode nuit [cite: 253]
+                self.start_action_thread(self.blink_logic, 2.0) # Clignotement lent pour le mode nuit
         except Exception as e:
             print(f"Erreur LED: {e}")
 
